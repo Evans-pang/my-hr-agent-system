@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: hr-agent-system
+    runtime: docker
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8082
+      - key: SQLITE_DB_PATH
+        value: /app/data/hr_system.db
+    disk:
+      name: data
+      mountPath: /app/data
+      sizeGB: 1
