@@ -1,35 +1,24 @@
-# 阶段1: 构建前端
-FROM node:20-alpine AS frontend-builder
+FROM node:20-slim
 
-WORKDIR /app/frontend
-
-# 复制前端依赖文件
-COPY frontend/package*.json ./
-RUN npm install
-
-# 复制前端源码
-COPY frontend/ ./
-
-# 构建前端（生产环境）
-RUN npm run build
-
-# 阶段2: 构建后端
-FROM node:20-alpine AS backend
-
-# 安装 SQLite 编译依赖
-RUN apk add --no-cache python3 make g++ sqlite
+# 安装 SQLite 和构建工具
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    sqlite3 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# 复制后端依赖文件
+# 复制后端依赖
 COPY mock-server/package*.json ./
 RUN npm install
 
 # 复制后端源码
 COPY mock-server/ ./
 
-# 复制前端构建产物到后端的 public 目录
-COPY --from=frontend-builder /app/frontend/dist ./public
+# 复制前端构建产物（已预构建）
+COPY mock-server/public ./public
 
 # 创建数据目录
 RUN mkdir -p /app/data
